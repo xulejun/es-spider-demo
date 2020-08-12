@@ -5,6 +5,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.net.URL;
@@ -12,9 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Jsoup爬虫工具类
  * @Author XLJ
  * @Date 2020/8/11
  */
+
+@Component
 public class HtmlParseUtil {
 
     public List<PageContent> parsePage(String keyword) throws IOException {
