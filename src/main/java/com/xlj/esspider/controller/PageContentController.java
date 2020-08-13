@@ -27,10 +27,10 @@ public class PageContentController {
         return pageContentService.parseContent(keyword);
     }
 
-    // 搜索
+    // 实现页面搜索
     @GetMapping("/search/{keyword}/{pageNo}/{pageSize}")
     public List<Map<String, Object>> search(@PathVariable String keyword, @PathVariable int PageNo, @PathVariable int pageSize) throws IOException {
-        return pageContentService.searchPage(keyword, PageNo, pageSize);
+        return pageContentService.searchHighLight(keyword, PageNo, pageSize);
     }
 
 

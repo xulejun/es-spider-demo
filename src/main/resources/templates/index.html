@@ -5,11 +5,10 @@
     <meta charset="utf-8"/>
     <title>Java-ES仿京东实战</title>
     <link rel="stylesheet" th:href="@{/css/style.css}"/>
-    <script th:src="@{/js/jquery.min.js}"></script>
 </head>
 
 <body class="pg">
-<div class="page">
+<div class="page" id="app">
     <div id="mallPage" class=" mallist tmall- page-not-market ">
 
         <!-- 头部搜索 -->
@@ -31,21 +30,22 @@
                                     <div class="mallSearch-input clearfix">
                                         <div class="s-combobox" id="s-combobox-685">
                                             <div class="s-combobox-input-wrap">
-                                                <input type="text" autocomplete="off" value="搜索" id="mq"
-                                                       class="s-combobox-input" aria-haspopup="true">
+                                                <!--v-model进行双向绑定数据-->
+                                                <input v-model="keyword" type="text" autocomplete="off" value="搜索"
+                                                       id="mq" class="s-combobox-input" aria-haspopup="true">
                                             </div>
                                         </div>
-                                        <button type="submit" id="searchbtn">搜索</button>
+                                        <button type="submit" @click.prevent="searchKey" id="searchbtn">搜索</button>
                                     </div>
                                 </fieldset>
                             </form>
-<!--                            <ul class="relKeyTop">-->
-<!--                                <li><a>狂神说Java</a></li>-->
-<!--                                <li><a>狂神说前端</a></li>-->
-<!--                                <li><a>狂神说Linux</a></li>-->
-<!--                                <li><a>狂神说大数据</a></li>-->
-<!--                                <li><a>狂神聊理财</a></li>-->
-<!--                            </ul>-->
+                            <!--                            <ul class="relKeyTop">-->
+                            <!--                                <li><a>狂神说Java</a></li>-->
+                            <!--                                <li><a>狂神说前端</a></li>-->
+                            <!--                                <li><a>狂神说Linux</a></li>-->
+                            <!--                                <li><a>狂神说大数据</a></li>-->
+                            <!--                                <li><a>狂神聊理财</a></li>-->
+                            <!--                            </ul>-->
                         </div>
                     </div>
                 </div>
@@ -85,31 +85,31 @@
 
                 <!-- 商品详情 -->
                 <div class="view grid-nosku">
-
-                    <div class="product">
+                    <!--v-for 遍历后台传入的数据-->
+                    <div class="product" v-for="result in results">
                         <div class="product-iWrap">
                             <!--商品封面-->
                             <div class="productImg-wrap">
                                 <a class="productImg">
-                                    <img src="https://img.alicdn.com/bao/uploaded/i1/3899981502/O1CN01q1uVx21MxxSZs8TVn_!!0-item_pic.jpg">
+                                    <img :src="result.img">
                                 </a>
                             </div>
                             <!--价格-->
                             <p class="productPrice">
-                                <em><b>¥</b>2590.00</em>
+                                <em>{{result.price}}</em>
                             </p>
                             <!--标题-->
                             <p class="productTitle">
-                                <a> dkny秋季纯色a字蕾丝dd商场同款连衣裙 </a>
+                                <a v-html="result.title"></a>
                             </p>
                             <!-- 店铺名 -->
                             <div class="productShop">
-                                <span>店铺： 狂神说Java </span>
+                                <span>ES-Spider店铺名</span>
                             </div>
                             <!-- 成交信息 -->
                             <p class="productStatus">
                                 <span>月成交<em>999笔</em></span>
-                                <span>评价 <a>3</a></span>
+                                <span>评价 <a>好评</a></span>
                             </p>
                         </div>
                     </div>
@@ -119,7 +119,26 @@
     </div>
 </div>
 
+<script th:src="@{/js/axios.min.js}"></script>
+<script th:src="@{/js/vue.min.js}"></script>
 <script>
+    new Vue({
+        el: '#app', // 绑定元素
+        data: {  // 传递数据
+            keyword: '', // 搜索的关键字
+            results: []  // 搜索的结果
+        },
+        // 绑定点击事件的方法
+        method: {
+            searchKey() {
+                var keyword = this.keyword;
+                // 用axios对接后端的接口
+                axios.get('search/' + keyword + "1/10").then(response => {
+                    this.results = response.data;   //绑定数据
+                })
+            }
+        }
+    })
 
 </script>
 
