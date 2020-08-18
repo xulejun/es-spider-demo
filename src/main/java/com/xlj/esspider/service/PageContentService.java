@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.xlj.esspider.pojo.PageContent;
 import com.xlj.esspider.util.HtmlParseUtil;
-import org.apache.lucene.util.QueryBuilder;
 import org.elasticsearch.action.bulk.BulkRequest;
 import org.elasticsearch.action.bulk.BulkResponse;
 import org.elasticsearch.action.index.IndexRequest;
@@ -70,8 +69,8 @@ public class PageContentService {
      * @date 2020/8/12 19:15
      */
     public List<Map<String, Object>> searchPage(String keyword, int pageNo, int pageSize) throws IOException {
-        if (pageNo<=1){
-            pageNo=1;
+        if (pageNo <= 1) {
+            pageNo = 1;
         }
         // 条件搜索
         SearchRequest searchRequest = new SearchRequest("jd_goods");
@@ -87,7 +86,7 @@ public class PageContentService {
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         // 解析结果
-        List<Map<String,Object>> lists = new ArrayList<>();
+        List<Map<String, Object>> lists = new ArrayList<>();
         for (SearchHit documentFields : searchResponse.getHits().getHits()) {
             lists.add(documentFields.getSourceAsMap());
         }
@@ -98,10 +97,10 @@ public class PageContentService {
      * @description: 搜索结果显示高亮
      * @author XLJ
      * @date 2020/8/13 11:50
-    */
+     */
     public List<Map<String, Object>> searchHighLight(String keyword, int pageNo, int pageSize) throws IOException {
-        if (pageNo<=1){
-            pageNo=1;
+        if (pageNo <= 1) {
+            pageNo = 1;
         }
         // 条件搜索
         SearchRequest searchRequest = new SearchRequest("jd_goods");
@@ -124,7 +123,7 @@ public class PageContentService {
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
         // 解析结果
-        List<Map<String,Object>> lists = new ArrayList<>();
+        List<Map<String, Object>> lists = new ArrayList<>();
         for (SearchHit documentFields : searchResponse.getHits().getHits()) {
             // 高亮字段
             Map<String, HighlightField> highlightFields = documentFields.getHighlightFields();
@@ -132,13 +131,13 @@ public class PageContentService {
             // 原来的结果
             Map<String, Object> sourceAsMap = documentFields.getSourceAsMap();
             // 解析高亮字段，替换成原来的结果
-            if (title!=null){
+            if (title != null) {
                 Text[] fragments = title.fragments();
-                String new_title="";
+                String new_title = "";
                 for (Text fragment : fragments) {
                     new_title += fragment;
                 }
-                sourceAsMap.put("title",new_title);
+                sourceAsMap.put("title", new_title);
             }
             lists.add(sourceAsMap);
         }
