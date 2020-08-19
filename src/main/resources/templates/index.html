@@ -100,7 +100,7 @@
                             </p>
                             <!--标题-->
                             <p class="productTitle">
-                                <a v-html="result.title"></a>
+                                <a v-html="result.name"></a>
                             </p>
                             <!-- 店铺名 -->
                             <div class="productShop">
@@ -136,7 +136,7 @@
                 // 用axios对接后端的接口
                 axios.get('search/' + keyword + "/1/10").then(response => {
                     console.log(response);
-                    this.results = response.data;   //绑定数据
+                    this.results = response.data;   // 绑定数据
                 })
             }
         }

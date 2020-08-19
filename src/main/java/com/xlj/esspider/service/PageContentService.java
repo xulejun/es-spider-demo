@@ -1,7 +1,6 @@
 package com.xlj.esspider.service;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.serializer.SerializeFilter;
 import com.xlj.esspider.pojo.PageContent;
 import com.xlj.esspider.util.HtmlParseUtil;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -47,20 +46,23 @@ public class PageContentService {
     public Boolean parseContent(String keyword) throws IOException {
         // 页面解析
         List<PageContent> pageContents = new HtmlParseUtil().parsePage(keyword);
-        // 将数据添加到ES中
+        // 创建ES数据处理对象
         BulkRequest bulkRequest = new BulkRequest();
         bulkRequest.timeout("10s");
 
         for (int i = 0; i < pageContents.size(); i++) {
-            String jsonString = JSON.toJSONString(pageContents.get(i), (SerializeFilter) XContentType.JSON);
-            IndexRequest jd_goods = new IndexRequest("jd_goods").source(jsonString);
+            // 封装成json对象
+            String jsonString = JSON.toJSONString(pageContents.get(i));
+            // 将数据添加到ES中
+            IndexRequest jd_goods = new IndexRequest("jd_goods").source(jsonString, XContentType.JSON);
             bulkRequest.add(jd_goods);
+
+//            bulkRequest.add(new IndexRequest("jd_goods").source(JSON.toJSONString(pageContents.get(i)), XContentType.JSON));
         }
         // ES执行添加数据
         BulkResponse bulk = restHighLevelClient.bulk(bulkRequest, RequestOptions.DEFAULT);
-        // 判断是否成功
-        boolean hasFailures = bulk.hasFailures();
-        return hasFailures;
+        // 判断是否成功，没有失败，则返回成功
+        return !bulk.hasFailures();
     }
 
     /**
@@ -78,8 +80,8 @@ public class PageContentService {
         // 分页
         searchSourceBuilder.from(pageNo);
         searchSourceBuilder.size(pageSize);
-        // 精确匹配
-        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("title", keyword);
+        // 精确匹配——第一个参数为ES数据库中的字段
+        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("name", keyword);
         searchSourceBuilder.query(termQueryBuilder);
         searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
         // 执行搜索
@@ -105,20 +107,26 @@ public class PageContentService {
         // 条件搜索
         SearchRequest searchRequest = new SearchRequest("jd_goods");
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+
         // 分页
         searchSourceBuilder.from(pageNo);
         searchSourceBuilder.size(pageSize);
+
         // 精确匹配
-        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("title", keyword);
+        TermQueryBuilder termQueryBuilder = QueryBuilders.termQuery("name", keyword);
         searchSourceBuilder.query(termQueryBuilder);
         searchSourceBuilder.timeout(new TimeValue(60, TimeUnit.SECONDS));
+
         // 高亮显示
         HighlightBuilder highlightBuilder = new HighlightBuilder();
-        highlightBuilder.field("title");
+        highlightBuilder.field("name");
         highlightBuilder.preTags("<span style='color:red'>");
         highlightBuilder.postTags("</span>");
         // 关闭多个字段匹配
         highlightBuilder.requireFieldMatch(false);
+        // 将高亮放入搜索
+        searchSourceBuilder.highlighter(highlightBuilder);
+
         // 执行搜索
         searchRequest.source(searchSourceBuilder);
         SearchResponse searchResponse = restHighLevelClient.search(searchRequest, RequestOptions.DEFAULT);
@@ -127,17 +135,17 @@ public class PageContentService {
         for (SearchHit documentFields : searchResponse.getHits().getHits()) {
             // 高亮字段
             Map<String, HighlightField> highlightFields = documentFields.getHighlightFields();
-            HighlightField title = highlightFields.get("title");
+            HighlightField name = highlightFields.get("name");
             // 原来的结果
             Map<String, Object> sourceAsMap = documentFields.getSourceAsMap();
             // 解析高亮字段，替换成原来的结果
-            if (title != null) {
-                Text[] fragments = title.fragments();
+            if (name != null) {
+                Text[] fragments = name.fragments();
                 String new_title = "";
                 for (Text fragment : fragments) {
                     new_title += fragment;
                 }
-                sourceAsMap.put("title", new_title);
+                sourceAsMap.put("name", new_title);
             }
             lists.add(sourceAsMap);
         }

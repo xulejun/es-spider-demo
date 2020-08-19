@@ -23,14 +23,14 @@ public class PageContentController {
 
     // 解析页面数据
     @GetMapping("/parse/{keyword}")
-    public Boolean parse(@PathVariable String keyword) throws IOException {
+    public Boolean parse(@PathVariable("keyword") String keyword) throws IOException {
         return pageContentService.parseContent(keyword);
     }
 
     // 实现页面搜索
     @GetMapping("/search/{keyword}/{pageNo}/{pageSize}")
-    public List<Map<String, Object>> search(@PathVariable String keyword, @PathVariable int PageNo, @PathVariable int pageSize) throws IOException {
-        return pageContentService.searchHighLight(keyword, PageNo, pageSize);
+    public List<Map<String, Object>> search(@PathVariable("keyword") String keyword, @PathVariable("pageNo") int pageNo, @PathVariable("pageSize") int pageSize) throws IOException {
+        return pageContentService.searchHighLight(keyword, pageNo, pageSize);
     }
 
 
