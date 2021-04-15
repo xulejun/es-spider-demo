@@ -13,4 +13,4 @@
 - Jsoup：页面爬取数据（HtmlParseUtil）
 - ElasticSearch：爬取页面后的数据库，在此数据库中进行搜索(PageContentService)
 - Vue、axios：前后端交互数据，在页面上显示(index.html)
-
+- zxing：二维码解析
